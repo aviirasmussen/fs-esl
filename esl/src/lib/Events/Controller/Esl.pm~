@@ -1,0 +1,18 @@
+package Harmony::Controller::Stratum;
+use Mojo::Base 'Mojolicious::Controller', -signatures;
+use Mojo::JSON qw(decode_json encode_json);
+#
+use Carp;
+use Data::Dumper;
+use Readonly;
+
+sub stratum ($self) {
+    my $json = $self->req->json;
+    my $body = $self->req->body;
+    $self->render(json => $json);    
+    #$self->app->log->debug('STRATUM:');
+    #$self->app->log->debug("JSON:\n" . Dumper $json);
+    #$self->app->log->debug("BODY:\n" . Dumper $body);
+    #$self->render(text => "stratum");
+}
+1;

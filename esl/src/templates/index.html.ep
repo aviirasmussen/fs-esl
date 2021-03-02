@@ -1,0 +1,80 @@
+<html>
+  <head>
+    <title>WebSocket Client</title>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha256-4+XzXVhsDmqanXGHaHvgh1gMQKX40OUvDEBTu8JcmNs=" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>    
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <style type="text/css">
+ 
+.input,
+.textarea {
+    border: 1px solid #ccc;
+    font-family: inherit;
+    font-size: inherit;
+    padding: 1px 6px;
+}
+.table {
+    font-family: "Heebo", sans-serif;
+    font-size: inherit;
+}
+body {
+    font-family: "Heebo", sans-serif;
+    max-width: 90%;
+    margin: 0 auto;
+    padding: 1rem;
+}
+h1 {
+    border-bottom: 5px solid #9ccc65;
+}
+h2 {
+    border-bottom: 2px solid #c5e1a5;
+}
+    </style>
+  </head>
+<body>
+
+<h1>Mojolicious + WebSocket + Freeswitch</h1>
+
+<p><strong>Event + enter</strong></p>
+<p><input type="text" id="cmd" /></p>
+<p><strong>Events:</strong> <div class="textarea" role="textbox" contenteditable id="log"></div></p>
+
+<script>
+  
+$(function () {
+    $('#cmd').focus();
+  
+    var ws  = new WebSocket('ws://192.168.1.32:8821/esl');
+    var idx = 0;
+    ws.onopen = function () {
+	$('#log').append("<span>Connection open</span><br/>");
+    };
+  
+    ws.onmessage = function (msg) {
+	idx++;
+	var json = JSON.parse(msg.data);
+	var html = '<span>['+json["Event-Date-Local"]+'] <a data-toggle="collapse" href="#collapse'+idx+'" role="button" aria-expanded="false" aria-controls="collapse'+idx+'">'+json["Event-Name"]+'</a></span><br/>';
+	
+	html += '<div class="collapse" id="collapse'+idx+'"><div class="card card-body"><table class="table">';
+	
+	$.each(json, function (key, data) {
+	    html += '<tr><td>'+key+'</td><td>'+data+'</td></tr>';
+	});
+	
+	html += '</table></div></div>';
+	$('#log').append(html);
+    };
+    
+    $('#cmd').keydown(function (e) {
+	if (e.keyCode == 13 && $('#cmd').val()) {
+            ws.send($('#cmd').val());
+            $('#cmd').val('');
+	}
+    });
+});
+  
+</script>
+
+
+</body>
+</html>

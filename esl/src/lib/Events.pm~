@@ -1,0 +1,45 @@
+package Harmony;
+use strict;
+use warnings;
+use utf8;
+
+use Mojo::Base 'Mojolicious', -signatures;
+use Readonly;
+use Data::Dumper;
+#
+#
+Readonly my $RW_FILES => 0000;
+Readonly my $HOME     => $ENV{'HOME'};
+Readonly my $TRUE     => 1;
+Readonly my $FALSE    => 0;
+#
+# umask $RW_FILES  will create log files in rw-rw-rw- (the leading 0 in value simply indicates an octal value).
+my $last_mask = umask $RW_FILES;
+
+#
+# Loads configuration from hash returned by "botlord.conf", using plugin $CONFIG
+# Loads helper methods, using plugin $HELPERS
+sub startup ($self) {
+    my $config  = $self->plugin('Config');
+
+    $self->log->level('debug');
+    $self->log->info('new request');
+
+    
+    my $routes  = $self->routes;
+    #my $routes = $r->any(['GET', 'POST'] => '/*foo' => sub ($c) {...});
+    #$routes->any(['GET', 'POST'] => '/*whatever' => sub ($c) {
+	#my $value = $c->param('whatever');
+	#$self->log->info('new AGENT request['.$value.'] path: '. $c->req->url->path);
+	#$self->log->info("REQ AGENT\n". Dumper $c->req);
+    #	 });
+    $routes->any(['GET', 'POST'] => '/*cmd')->to( controller => 'stratum', action => 'stratum');
+    #$routes->any('/agent')->to( controller => 'stratum', action => 'stratum');
+    ##skipcbcheck#xnsub
+    $self->hook(before_dispatch => sub ($c) {
+	$self->log->info('hook before dispatch: '. $c->req->url->path);
+	#$self->log->info("REQ\n". Dumper $c->req);
+		});
+    return $TRUE;
+}
+1;
